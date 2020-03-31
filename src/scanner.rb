@@ -29,34 +29,24 @@ class Scanner
     character = advance
 
     case character
-    when '('
-      add_token(Token::LEFT_PARENTHESIS)
-    when ')'
-      add_token(Token::RIGHT_PARENTHESIS)
-    when '{'
-      add_token(Token::LEFT_BRACE)
-    when '}'
-      add_token(Token::RIGHT_BRACE)
-    when ','
-      add_token(Token::COMMA)
-    when '.'
-      add_token(Token::DOT)
-    when '-'
-      add_token(Token::MINUS)
-    when '+'
-      add_token(Token::PLUS)
-    when ';'
-      add_token(Token::SEMICOLON)
-    when '*'
-      add_token(Token::STAR)
-    when '!'
-      add_token(matches?('=') ? Token::BANG_EQUAL : Token::BANG)
-    when '='
-      add_token(matches?('=') ? Token::EQUAL_EQUAL : Token::EQUAL)
-    when '<'
-      add_token(matches?('=') ? Token::LESS_EQUAL : Token::LESS)
-    when '>'
-      add_token(matches?('=') ? Token::GREATER_EQUAL : Token::GREATER)
+    when '(' then add_token(Token::LEFT_PARENTHESIS)
+    when ')' then add_token(Token::RIGHT_PARENTHESIS)
+    when '{' then add_token(Token::LEFT_BRACE)
+    when '}' then add_token(Token::RIGHT_BRACE)
+    when ',' then add_token(Token::COMMA)
+    when '.' then add_token(Token::DOT)
+    when '-' then add_token(Token::MINUS)
+    when '+' then add_token(Token::PLUS)
+    when ';' then add_token(Token::SEMICOLON)
+    when '*' then add_token(Token::STAR)
+    when '!' then add_token(matches?('=') ? Token::BANG_EQUAL : Token::BANG)
+    when '=' then add_token(matches?('=') ? Token::EQUAL_EQUAL : Token::EQUAL)
+    when '<' then add_token(matches?('=') ? Token::LESS_EQUAL : Token::LESS)
+    when '>' then add_token(matches?('=') ? Token::GREATER_EQUAL : Token::GREATER)
+    when ' ', "\r", "\t" then nil
+    when "\n" then @line += 1
+    when '"' then string
+
     when '/'
       # is this a comment (//)?
       if matches?('/')
@@ -77,13 +67,7 @@ class Scanner
       else
         add_token(Token::SLASH)
       end
-    # skip this whitespace
-    when ' ', "\r", "\t"
-      nil
-    when "\n"
-      @line += 1
-    when '"'
-      string
+
     else
       if is_digit?(character)
         number
