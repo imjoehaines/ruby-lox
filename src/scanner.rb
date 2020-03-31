@@ -12,7 +12,7 @@ class Scanner
   end
 
   def scan_tokens
-    until is_at_end
+    until is_at_end?
       @start = @current
 
       scan_token
@@ -50,20 +50,20 @@ class Scanner
     when '*'
       add_token(Token::STAR)
     when '!'
-      add_token(matches('=') ? Token::BANG_EQUAL : Token::BANG)
+      add_token(matches?('=') ? Token::BANG_EQUAL : Token::BANG)
     when '='
-      add_token(matches('=') ? Token::EQUAL_EQUAL : Token::EQUAL)
+      add_token(matches?('=') ? Token::EQUAL_EQUAL : Token::EQUAL)
     when '<'
-      add_token(matches('=') ? Token::LESS_EQUAL : Token::LESS)
+      add_token(matches?('=') ? Token::LESS_EQUAL : Token::LESS)
     when '>'
-      add_token(matches('=') ? Token::GREATER_EQUAL : Token::GREATER)
+      add_token(matches?('=') ? Token::GREATER_EQUAL : Token::GREATER)
     when '/'
       # is this a comment (//)?
-      if matches('/')
-        advance while peek != "\n" && !is_at_end
+      if matches?('/')
+        advance while peek != "\n" && !is_at_end?
       # is this a block comment (/*)?
-      elsif matches('*')
-        until is_at_end
+      elsif matches?('*')
+        until is_at_end?
           advance
 
           next unless (peek == '*') && (peek_next == '/')
@@ -85,9 +85,9 @@ class Scanner
     when '"'
       string
     else
-      if is_digit(character)
+      if is_digit?(character)
         number
-      elsif is_alpha(character)
+      elsif is_alpha?(character)
         identifier
       else
         Rlox.error(@line, "Unexpected character '#{character}'")
@@ -95,8 +95,8 @@ class Scanner
     end
   end
 
-  def matches(expected)
-    return false if is_at_end
+  def matches?(expected)
+    return false if is_at_end?
 
     return false if @source[@current] != expected
 
@@ -112,7 +112,7 @@ class Scanner
   end
 
   def peek
-    return "\0" if is_at_end
+    return "\0" if is_at_end?
 
     @source[@current]
   end
@@ -133,30 +133,30 @@ class Scanner
     @tokens.push(Token.new(type, text, literal, @line))
   end
 
-  def is_at_end
+  def is_at_end?
     @current >= @source.length
   end
 
-  def is_digit(character)
+  def is_digit?(character)
     character >= '0' && character <= '9'
   end
 
-  def is_alpha(character)
+  def is_alpha?(character)
     (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || character == '_'
   end
 
-  def is_alpha_numeric(character)
-    is_digit(character) || is_alpha(character)
+  def is_alpha_numeric?(character)
+    is_digit?(character) || is_alpha?(character)
   end
 
   def string
-    while peek != '"' && !is_at_end
+    while peek != '"' && !is_at_end?
       @line += 1 if peek == "\n"
 
       advance
     end
 
-    if is_at_end
+    if is_at_end?
       Rlox.error(@line, 'Unterminated string')
       return
     end
@@ -171,13 +171,13 @@ class Scanner
   end
 
   def number
-    advance while is_digit(peek)
+    advance while is_digit?(peek)
 
-    if peek == '.' && is_digit(peek_next)
+    if peek == '.' && is_digit?(peek_next)
       # eat the .
       advance
 
-      advance while is_digit(peek)
+      advance while is_digit?(peek)
     end
 
     value = @source[@start..@current - 1].to_f
@@ -186,7 +186,7 @@ class Scanner
   end
 
   def identifier
-    advance while is_alpha_numeric(peek)
+    advance while is_alpha_numeric?(peek)
 
     value = @source[@start..@current - 1]
 
