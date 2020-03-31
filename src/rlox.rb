@@ -26,6 +26,12 @@ class Rlox
     end
   end
 
+  def self.error(line, message)
+    report(line, '', message)
+  end
+
+  private
+
   def run(source)
     scanner = Scanner.new(source)
 
@@ -34,10 +40,6 @@ class Rlox
     tokens.each do |token|
       puts token
     end
-  end
-
-  def self.error(line, message)
-    report(line, '', message)
   end
 
   def self.report(line, where, message)

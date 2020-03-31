@@ -23,6 +23,8 @@ class Scanner
     @tokens
   end
 
+  private
+
   def scan_token
     character = advance
 
