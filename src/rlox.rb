@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+require_relative 'parser'
 require_relative 'scanner'
+require_relative 'token'
 
 class Rlox
   @had_error = false
@@ -30,6 +32,14 @@ class Rlox
     report(line, '', message)
   end
 
+  def self.parse_error(token, message)
+    if token.type == Token::EOF
+      report(token.line, ' at end', message)
+    else
+      report(token.line, "at '#{token.lexeme}'", message)
+    end
+  end
+
   private
 
   def run(source)
@@ -37,9 +47,21 @@ class Rlox
 
     tokens = scanner.scan_tokens
 
+    puts 'tokens:'
+
     tokens.each do |token|
-      puts token
+      puts "  #{token}"
     end
+
+    puts "\n"
+
+    parser = Parser.new(tokens)
+
+    expression = parser.parse
+
+    return if @had_error
+
+    puts expression
   end
 
   def self.report(line, where, message)
