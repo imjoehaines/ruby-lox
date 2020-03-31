@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'token'
 
 class Scanner
@@ -9,85 +11,82 @@ class Scanner
     @line = 1
   end
 
-  def scan_tokens()
-    while (!self.is_at_end()) do
+  def scan_tokens
+    until is_at_end
       @start = @current
 
-      self.scan_token()
+      scan_token
     end
 
-    @tokens.push(Token.new(Token::EOF, "", nil, @line))
+    @tokens.push(Token.new(Token::EOF, '', nil, @line))
 
     @tokens
   end
 
   def scan_token
-    character = self.advance()
+    character = advance
 
     case character
-    when "("
-      self.add_token(Token::LEFT_PARENTHESIS)
-    when ")"
-      self.add_token(Token::RIGHT_PARENTHESIS)
-    when "{"
-      self.add_token(Token::LEFT_BRACE)
-    when "}"
-      self.add_token(Token::RIGHT_BRACE)
-    when ","
-      self.add_token(Token::COMMA)
-    when "."
-      self.add_token(Token::DOT)
-    when "-"
-      self.add_token(Token::MINUS)
-    when "+"
-      self.add_token(Token::PLUS)
-    when ";"
-      self.add_token(Token::SEMICOLON)
-    when "*"
-      self.add_token(Token::STAR)
-    when "!"
-      self.add_token(matches("=") ? Token::BANG_EQUAL : Token::BANG)
-    when "="
-      self.add_token(matches("=") ? Token::EQUAL_EQUAL : Token::EQUAL)
-    when "<"
-      self.add_token(matches("=") ? Token::LESS_EQUAL : Token::LESS)
-    when ">"
-      self.add_token(matches("=") ? Token::GREATER_EQUAL : Token::GREATER)
-    when "/"
+    when '('
+      add_token(Token::LEFT_PARENTHESIS)
+    when ')'
+      add_token(Token::RIGHT_PARENTHESIS)
+    when '{'
+      add_token(Token::LEFT_BRACE)
+    when '}'
+      add_token(Token::RIGHT_BRACE)
+    when ','
+      add_token(Token::COMMA)
+    when '.'
+      add_token(Token::DOT)
+    when '-'
+      add_token(Token::MINUS)
+    when '+'
+      add_token(Token::PLUS)
+    when ';'
+      add_token(Token::SEMICOLON)
+    when '*'
+      add_token(Token::STAR)
+    when '!'
+      add_token(matches('=') ? Token::BANG_EQUAL : Token::BANG)
+    when '='
+      add_token(matches('=') ? Token::EQUAL_EQUAL : Token::EQUAL)
+    when '<'
+      add_token(matches('=') ? Token::LESS_EQUAL : Token::LESS)
+    when '>'
+      add_token(matches('=') ? Token::GREATER_EQUAL : Token::GREATER)
+    when '/'
       # is this a comment (//)?
-      if self.matches("/") then
-        while self.peek() != "\n" && !self.is_at_end() do
-          self.advance()
-        end
+      if matches('/')
+        advance while peek != "\n" && !is_at_end
       # is this a block comment (/*)?
-      elsif self.matches("*") then
-        while !self.is_at_end() do
+      elsif matches('*')
+        until is_at_end
+          advance
 
-          self.advance()
+          next unless (peek == '*') && (peek_next == '/')
 
-          if self.peek() == "*" and self.peek_next() == "/" then
-            # eat the closing "*/"
-            self.advance()
-            self.advance()
+          # eat the closing "*/"
+          advance
+          advance
 
-            break
-          end
+          break
         end
       else
-        self.add_token(Token::SLASH)
+        add_token(Token::SLASH)
       end
     # skip this whitespace
-    when " ", "\r", "\t"
+    when ' ', "\r", "\t"
       nil
     when "\n"
       @line += 1
     when '"'
-      self.string()
+      string
     else
-      if self.is_digit(character)
-        self.number()
-      elsif self.is_alpha(character)
-        self.identifier()
+      if is_digit(character)
+        number
+      elsif is_alpha(character)
+        identifier
       else
         Rlox.error(@line, "Unexpected character '#{character}'")
       end
@@ -95,7 +94,7 @@ class Scanner
   end
 
   def matches(expected)
-    return false if self.is_at_end()
+    return false if is_at_end
 
     return false if @source[@current] != expected
 
@@ -104,19 +103,19 @@ class Scanner
     true
   end
 
-  def advance()
+  def advance
     @current += 1
 
     @source[@current - 1]
   end
 
-  def peek()
-    return "\0" if self.is_at_end()
+  def peek
+    return "\0" if is_at_end
 
     @source[@current]
   end
 
-  def peek_next()
+  def peek_next
     return "\0" if @current + 1 >= @source.length
 
     @source[@current + 1]
@@ -132,33 +131,31 @@ class Scanner
     @tokens.push(Token.new(type, text, literal, @line))
   end
 
-  def is_at_end()
+  def is_at_end
     @current >= @source.length
   end
 
   def is_digit(character)
-    character >= "0" && character <= "9"
+    character >= '0' && character <= '9'
   end
 
   def is_alpha(character)
-    (character >= "a" && character <= "z") || (character >= "A" && character <= "Z") || character == "_"
+    (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || character == '_'
   end
 
   def is_alpha_numeric(character)
     is_digit(character) || is_alpha(character)
   end
 
-  def string()
-    while self.peek() != '"' && !self.is_at_end() do
-      if self.peek() == "\n" then
-        @line += 1
-      end
+  def string
+    while peek != '"' && !is_at_end
+      @line += 1 if peek == "\n"
 
-      self.advance()
+      advance
     end
 
-    if self.is_at_end() then
-      Rlox.error(@line, "Unterminated string")
+    if is_at_end
+      Rlox.error(@line, 'Unterminated string')
       return
     end
 
@@ -166,42 +163,34 @@ class Scanner
     value = @source[@start + 1..@current - 1]
 
     # eat the closing "
-    self.advance()
+    advance
 
     add_token_with_value(Token::STRING, value)
   end
 
-  def number()
-    while self.is_digit(self.peek()) do
-      self.advance()
-    end
+  def number
+    advance while is_digit(peek)
 
-    if self.peek() == "." && self.is_digit(self.peek_next())
+    if peek == '.' && is_digit(peek_next)
       # eat the .
-      self.advance()
+      advance
 
-      while self.is_digit(self.peek()) do
-        self.advance()
-      end
+      advance while is_digit(peek)
     end
 
     value = @source[@start..@current - 1].to_f
 
-    self.add_token_with_value(Token::NUMBER, value)
+    add_token_with_value(Token::NUMBER, value)
   end
 
-  def identifier()
-    while is_alpha_numeric(peek()) do
-      self.advance()
-    end
+  def identifier
+    advance while is_alpha_numeric(peek)
 
     value = @source[@start..@current - 1]
 
     type = Token::IDENTIFIER
 
-    if Token::KEYWORDS.has_key?(value)
-      type = Token::KEYWORDS[value]
-    end
+    type = Token::KEYWORDS[value] if Token::KEYWORDS.key?(value)
 
     add_token(type)
   end

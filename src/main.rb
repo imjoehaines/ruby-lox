@@ -1,5 +1,7 @@
-if ARGV.length > 1 then
-  puts "Usage: #{$0} [script]"
+# frozen_string_literal: true
+
+if ARGV.length > 1
+  puts "Usage: #{$PROGRAM_NAME} [script]"
   exit 64
 end
 
@@ -7,8 +9,8 @@ require_relative 'rlox'
 
 rlox = Rlox.new
 
-if ARGV.length == 1 then
+if ARGV.length == 1
   rlox.run_file(ARGV[0])
 else
-  rlox.run_prompt()
+  rlox.run_prompt
 end

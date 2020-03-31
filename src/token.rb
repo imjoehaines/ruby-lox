@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Token
   def initialize(type, lexeme, literal, line)
     @type = type
@@ -7,7 +9,7 @@ class Token
   end
 
   def to_s
-    return "#{@type} #{@lexeme} #{@literal}"
+    "#{@type} #{@lexeme} #{@literal}"
   end
 
   # Single-character tokens
@@ -59,21 +61,21 @@ class Token
   EOF = 'T_EOF'
 
   KEYWORDS = {
-    "and" => AND,
-    "class" => CLASS,
-    "else" => ELSE,
-    "false" => FALSE,
-    "fun" => FUN,
-    "for" => FOR,
-    "if" => IF,
-    "nil" => NIL,
-    "or" => OR,
-    "print" => PRINT,
-    "return" => RETURN,
-    "super" => SUPER,
-    "this" => THIS,
-    "true" => TRUE,
-    "var" => VAR,
-    "while" => WHILE,
-  }
+    'and' => AND,
+    'class' => CLASS,
+    'else' => ELSE,
+    'false' => FALSE,
+    'fun' => FUN,
+    'for' => FOR,
+    'if' => IF,
+    'nil' => NIL,
+    'or' => OR,
+    'print' => PRINT,
+    'return' => RETURN,
+    'super' => SUPER,
+    'this' => THIS,
+    'true' => TRUE,
+    'var' => VAR,
+    'while' => WHILE
+  }.freeze
 end

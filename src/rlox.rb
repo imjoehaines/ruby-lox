@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'scanner'
 
 class Rlox
@@ -8,14 +10,12 @@ class Rlox
 
     run(contents)
 
-    if @had_error
-      exit 65
-    end
+    exit 65 if @had_error
   end
 
-  def run_prompt()
+  def run_prompt
     loop do
-      print "> "
+      print '> '
       $stdout.flush
 
       input = gets
@@ -29,7 +29,7 @@ class Rlox
   def run(source)
     scanner = Scanner.new(source)
 
-    tokens = scanner.scan_tokens()
+    tokens = scanner.scan_tokens
 
     tokens.each do |token|
       puts token
@@ -37,7 +37,7 @@ class Rlox
   end
 
   def self.error(line, message)
-    self.report(line, "", message)
+    report(line, '', message)
   end
 
   def self.report(line, where, message)
