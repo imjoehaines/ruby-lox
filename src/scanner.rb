@@ -57,7 +57,7 @@ class Scanner
     when "/"
       # is this a comment (//)?
       if (self.matches("/")) then
-        while self.peek() != "\n" and !self.is_at_end() do
+        while self.peek() != "\n" && !self.is_at_end() do
           self.advance()
         end
       else
@@ -73,6 +73,8 @@ class Scanner
     else
       if self.is_digit(character)
         self.number()
+      elsif self.is_alpha(character)
+        self.identifier()
       else
         Rlox.error(@line, "Unexpected character '#{character}'")
       end
@@ -95,10 +97,16 @@ class Scanner
     @source[@current - 1]
   end
 
-  def peek(offset: 0)
-    return "\0" if self.is_at_end(offset: offset)
+  def peek()
+    return "\0" if self.is_at_end()
 
-    @source[@current + offset]
+    @source[@current]
+  end
+
+  def peek_next()
+    return "\0" if @current + 1 >= @source.length
+
+    @source[@current + 1]
   end
 
   def add_token(type)
@@ -111,16 +119,24 @@ class Scanner
     @tokens.push(Token.new(type, text, literal, @line))
   end
 
-  def is_at_end(offset: 0)
-    @current + offset >= @source.length
+  def is_at_end()
+    @current >= @source.length
   end
 
   def is_digit(character)
-    character >= "0" and character <= "9"
+    character >= "0" && character <= "9"
+  end
+
+  def is_alpha(character)
+    (character >= "a" && character <= "z") || (character >= "A" && character <= "Z") || character == "_"
+  end
+
+  def is_alpha_numeric(character)
+    is_digit(character) || is_alpha(character)
   end
 
   def string()
-    while self.peek() != '"' and !self.is_at_end() do
+    while self.peek() != '"' && !self.is_at_end() do
       if self.peek() == "\n" then
         @line += 1
       end
@@ -147,7 +163,7 @@ class Scanner
       self.advance()
     end
 
-    if self.peek() == "." and self.is_digit(self.peek(offset: 1))
+    if self.peek() == "." && self.is_digit(self.peek_next())
       # eat the .
       self.advance()
 
@@ -159,5 +175,21 @@ class Scanner
     value = @source[@start..@current - 1].to_f
 
     self.add_token_with_value(Token::NUMBER, value)
+  end
+
+  def identifier()
+    while is_alpha_numeric(peek()) do
+      self.advance()
+    end
+
+    value = @source[@start..@current - 1]
+
+    type = Token::IDENTIFIER
+
+    if Token::KEYWORDS.has_key?(value)
+      type = Token::KEYWORDS[value]
+    end
+
+    add_token(type)
   end
 end
