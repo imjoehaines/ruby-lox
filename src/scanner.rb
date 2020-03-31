@@ -1,5 +1,4 @@
 require_relative 'token'
-require_relative 'scanner-exception'
 
 class Scanner
   def initialize(source)

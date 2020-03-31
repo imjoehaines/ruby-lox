@@ -1,5 +1,4 @@
 require_relative 'scanner'
-require_relative 'scanner-exception'
 
 class Rlox
   @had_error = false
