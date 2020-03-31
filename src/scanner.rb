@@ -55,9 +55,23 @@ class Scanner
       self.add_token(matches("=") ? Token::GREATER_EQUAL : Token::GREATER)
     when "/"
       # is this a comment (//)?
-      if (self.matches("/")) then
+      if self.matches("/") then
         while self.peek() != "\n" && !self.is_at_end() do
           self.advance()
+        end
+      # is this a block comment (/*)?
+      elsif self.matches("*") then
+        while !self.is_at_end() do
+
+          self.advance()
+
+          if self.peek() == "*" and self.peek_next() == "/" then
+            # eat the closing "*/"
+            self.advance()
+            self.advance()
+
+            break
+          end
         end
       else
         self.add_token(Token::SLASH)
