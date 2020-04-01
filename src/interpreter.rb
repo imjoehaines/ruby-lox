@@ -103,11 +103,10 @@ class Interpreter
   end
 
   def is_truthy?(value)
-    !value.nil? && value != false
+    !!value
   end
 
   def is_equal?(left, right)
-    # TODO: is this what we want?
     left == right
   end
 
