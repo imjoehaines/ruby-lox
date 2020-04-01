@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'token'
+require_relative 'interpreter'
 require_relative 'expressions/assignment-expression'
 require_relative 'expressions/binary-expression'
 require_relative 'expressions/call-expression'

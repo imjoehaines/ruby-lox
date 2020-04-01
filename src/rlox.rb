@@ -5,14 +5,19 @@ require_relative 'scanner'
 require_relative 'token'
 
 class Rlox
-  @had_error = false
+  def initialize
+    @@had_error = false
+    @had_runtime_error = false
+    @interpreter = Interpreter.new
+  end
 
   def run_file(path)
     contents = File.read(path)
 
     run(contents)
 
-    exit 65 if @had_error
+    exit 65 if @@had_error
+    exit 70 if @@had_error
   end
 
   def run_prompt
@@ -20,11 +25,11 @@ class Rlox
       print '> '
       $stdout.flush
 
-      input = gets
+      input = STDIN.gets
 
-      run(input)
+      run(input.chomp)
 
-      @had_error = false
+      @@had_error = false
     end
   end
 
@@ -40,6 +45,12 @@ class Rlox
     end
   end
 
+  def self.runtime_error(error)
+    puts "[line: #{error.token.line}] #{error.message}"
+
+    @had_runtime_error = true
+  end
+
   private
 
   def run(source)
@@ -47,26 +58,18 @@ class Rlox
 
     tokens = scanner.scan_tokens
 
-    puts 'tokens:'
-
-    tokens.each do |token|
-      puts "  #{token}"
-    end
-
-    puts "\n"
-
     parser = Parser.new(tokens)
 
     expression = parser.parse
 
-    return if @had_error
+    return if @@had_error
 
-    puts expression
+    @interpreter.interpret(expression)
   end
 
   def self.report(line, where, message)
     puts "[line #{line}] Error #{where}: #{message}"
 
-    @had_error = true
+    @@had_error = true
   end
 end

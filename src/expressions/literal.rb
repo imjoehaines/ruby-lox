@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 class Literal
-  attr_reader :literal
+  attr_reader :value
 
-  def initialize(literal)
-    @literal = literal
+  def initialize(value)
+    @value = value
   end
 
   def to_s
-    @literal.to_s
+    @value.to_s
   end
 end
