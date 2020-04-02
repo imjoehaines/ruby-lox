@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Environment
-  def initialize
+  def initialize(enclosing = nil)
     @values = {}
+    @enclosing = enclosing
   end
 
   def define(name, value)
@@ -12,11 +13,17 @@ class Environment
   def assign(token, value)
     name = token.lexeme
 
-    unless @values.key?(name)
-      raise RloxRuntimeError.new(token, "Undefined variable #{name}")
+    if @values.key?(name)
+      @values[name] = value
+      return
     end
 
-    @values[name] = value
+    unless @enclosing.nil?
+      @enclosing.assign(token, value)
+      return
+    end
+
+    raise RloxRuntimeError.new(token, "Undefined variable (assignment) '#{name}'.")
   end
 
   def get(token)
@@ -24,6 +31,8 @@ class Environment
 
     return @values[name] if @values.key?(name)
 
-    raise RloxRuntimeError.new(token, "Undefined variable '#{name}'.")
+    return @enclosing.get(token) unless @enclosing.nil?
+
+    raise RloxRuntimeError.new(token, "Undefined variable (get) '#{name}'.")
   end
 end

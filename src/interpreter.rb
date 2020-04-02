@@ -9,6 +9,7 @@ require_relative 'expressions/call-expression'
 require_relative 'expressions/grouping'
 require_relative 'expressions/literal'
 require_relative 'expressions/unary-expression'
+require_relative 'statements/block-statement'
 require_relative 'statements/expression-statement'
 require_relative 'statements/print-statement'
 
@@ -162,8 +163,24 @@ class Interpreter
       @environment.define(statement.name.lexeme, value)
 
       nil
+    when statement.is_a?(BlockStatement)
+      execute_block(statement.statements, Environment.new(@environment))
     else
       raise 'Invalid statement type'
+    end
+  end
+
+  def execute_block(statements, environment)
+    previous = @environment
+
+    begin
+      @environment = environment
+
+      statements.each do |statement|
+        execute(statement)
+      end
+    ensure
+      @environment = previous
     end
   end
 

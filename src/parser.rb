@@ -10,6 +10,7 @@ require_relative 'expressions/grouping'
 require_relative 'expressions/literal'
 require_relative 'expressions/unary-expression'
 require_relative 'expressions/variable-expression'
+require_relative 'statements/block-statement'
 require_relative 'statements/expression-statement'
 require_relative 'statements/print-statement'
 require_relative 'statements/variable-statement'
@@ -34,12 +35,25 @@ class Parser
 
   def declaration
     return variable_declaration if matches?(Token::VAR)
+    return BlockStatement.new(block) if matches?(Token::LEFT_BRACE)
 
     statement
   rescue RloxParseError => e
     synchronise
 
     nil
+  end
+
+  def block
+    statements = []
+
+    while !check?(Token::RIGHT_BRACE) && !is_at_end?
+      statements.push(declaration)
+    end
+
+    consume(Token::RIGHT_BRACE, "Expect '}' after block.")
+
+    statements
   end
 
   def variable_declaration
