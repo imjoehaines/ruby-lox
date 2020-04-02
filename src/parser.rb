@@ -8,8 +8,10 @@ require_relative 'expressions/call-expression'
 require_relative 'expressions/grouping'
 require_relative 'expressions/literal'
 require_relative 'expressions/unary-expression'
+require_relative 'expressions/variable-expression'
 require_relative 'statements/expression-statement'
 require_relative 'statements/print-statement'
+require_relative 'statements/variable-statement'
 
 class Parser
   def initialize(tokens)
@@ -20,7 +22,7 @@ class Parser
   def parse
     statements = []
 
-    statements.push(statement) until is_at_end?
+    statements.push(declaration) until is_at_end?
 
     statements
   rescue RuntimeError => e
@@ -28,6 +30,28 @@ class Parser
   end
 
   private
+
+  def declaration
+    return variable_declaration if matches?(Token::VAR)
+
+    statement
+  rescue ParseError => e
+    synchronise
+
+    nil
+  end
+
+  def variable_declaration
+    name = consume(Token::IDENTIFIER, 'Expect variable name')
+
+    initializer = nil
+
+    initializer = expression if matches?(Token::EQUAL)
+
+    consume(Token::SEMICOLON, "Expect ';' after variable declaration.")
+
+    VariableStatement.new(name, initializer)
+  end
 
   def statement
     return print_statement if matches?(Token::PRINT)
@@ -128,6 +152,8 @@ class Parser
     if matches?(Token::NUMBER, Token::STRING)
       return Literal.new(previous.literal)
     end
+
+    return VariableExpression.new(previous) if matches?(Token::IDENTIFIER)
 
     if matches?(Token::LEFT_PARENTHESIS)
       expr = expression

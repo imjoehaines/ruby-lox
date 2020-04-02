@@ -1,0 +1,15 @@
+var a = "before";
+print a;
+
+var a = "after";
+print a;
+
+var hello = "Hello";
+var world = "World";
+
+print hello + ", " + world + "!";
+
+var x = 1;
+var y = 2;
+
+print x + y;

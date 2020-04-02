@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'token'
+require_relative 'environment'
 require_relative 'rlox-runtime-error'
 require_relative 'expressions/assignment-expression'
 require_relative 'expressions/binary-expression'
@@ -12,6 +13,10 @@ require_relative 'statements/expression-statement'
 require_relative 'statements/print-statement'
 
 class Interpreter
+  def initialize
+    @environment = Environment.new
+  end
+
   def interpret(statements)
     statements.each do |statement|
       execute(statement)
@@ -126,6 +131,8 @@ class Interpreter
       interpret_literal_expression(expression)
     when expression.is_a?(UnaryExpression)
       interpret_unary_expression(expression)
+    when expression.is_a?(VariableExpression)
+      @environment.get(expression.name)
     else
       raise 'Invalid expression type'
     end
@@ -141,6 +148,14 @@ class Interpreter
       value = evaluate(statement.value)
 
       puts value.to_s
+
+      nil
+    when statement.is_a?(VariableStatement)
+      value = nil
+
+      value = evaluate(statement.initializer) unless statement.initializer.nil?
+
+      @environment.define(statement.name.lexeme, value)
 
       nil
     else
