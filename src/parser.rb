@@ -2,6 +2,7 @@
 
 require_relative 'token'
 require_relative 'interpreter'
+require_relative 'rlox-parse-error'
 require_relative 'expressions/assignment-expression'
 require_relative 'expressions/binary-expression'
 require_relative 'expressions/call-expression'
@@ -35,7 +36,7 @@ class Parser
     return variable_declaration if matches?(Token::VAR)
 
     statement
-  rescue ParseError => e
+  rescue RloxParseError => e
     synchronise
 
     nil
@@ -76,7 +77,24 @@ class Parser
   end
 
   def expression
-    equality
+    assignment
+  end
+
+  def assignment
+    expr = equality
+
+    if matches?(Token::EQUAL)
+      equals = previous
+      value = assignment
+
+      if expr.is_a?(VariableExpression)
+        return AssignmentExpression.new(expr.name, value)
+      end
+
+      raise error(equals, 'Invalid assignment target')
+    end
+
+    expr
   end
 
   def equality

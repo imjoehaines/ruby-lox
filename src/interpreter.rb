@@ -120,7 +120,11 @@ class Interpreter
   def evaluate(expression)
     case true
     when expression.is_a?(AssignmentExpression)
+      value = evaluate(expression.value)
 
+      @environment.assign(expression.name, value)
+
+      value
     when expression.is_a?(BinaryExpression)
       interpret_binary_expression(expression)
     when expression.is_a?(CallExpression)

@@ -9,6 +9,16 @@ class Environment
     @values[name] = value
   end
 
+  def assign(token, value)
+    name = token.lexeme
+
+    unless @values.key?(name)
+      raise RloxRuntimeError.new(token, "Undefined variable #{name}")
+    end
+
+    @values[name] = value
+  end
+
   def get(token)
     name = token.lexeme
 
