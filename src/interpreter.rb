@@ -8,12 +8,14 @@ require_relative 'expressions/call-expression'
 require_relative 'expressions/grouping'
 require_relative 'expressions/literal'
 require_relative 'expressions/unary-expression'
+require_relative 'statements/expression-statement'
+require_relative 'statements/print-statement'
 
 class Interpreter
-  def interpret(expression)
-    value = evaluate(expression)
-
-    puts value
+  def interpret(statements)
+    statements.each do |statement|
+      execute(statement)
+    end
   rescue RloxRuntimeError => e
     Rlox.runtime_error(e)
   end
@@ -126,6 +128,23 @@ class Interpreter
       interpret_unary_expression(expression)
     else
       raise 'Invalid expression type'
+    end
+  end
+
+  def execute(statement)
+    case true
+    when statement.is_a?(ExpressionStatement)
+      evaluate(statement.expression)
+
+      nil
+    when statement.is_a?(PrintStatement)
+      value = evaluate(statement.value)
+
+      puts value.to_s
+
+      nil
+    else
+      raise 'Invalid statement type'
     end
   end
 

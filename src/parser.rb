@@ -8,6 +8,8 @@ require_relative 'expressions/call-expression'
 require_relative 'expressions/grouping'
 require_relative 'expressions/literal'
 require_relative 'expressions/unary-expression'
+require_relative 'statements/expression-statement'
+require_relative 'statements/print-statement'
 
 class Parser
   def initialize(tokens)
@@ -16,9 +18,37 @@ class Parser
   end
 
   def parse
-    expression
+    statements = []
+
+    statements.push(statement) until is_at_end?
+
+    statements
   rescue RuntimeError => e
     nil
+  end
+
+  private
+
+  def statement
+    return print_statement if matches?(Token::PRINT)
+
+    expression_statement
+  end
+
+  def print_statement
+    value = expression
+
+    consume(Token::SEMICOLON, "Expect ';' after value")
+
+    PrintStatement.new(value)
+  end
+
+  def expression_statement
+    value = expression
+
+    consume(Token::SEMICOLON, "Expect ';' after value")
+
+    ExpressionStatement.new(value)
   end
 
   def expression
@@ -31,6 +61,7 @@ class Parser
     while matches?(Token::BANG_EQUAL, Token::EQUAL_EQUAL)
       operator = previous
       right = comparison
+
       expr = BinaryExpression.new(expr, operator, right)
     end
 
@@ -43,6 +74,7 @@ class Parser
     while matches?(Token::GREATER, Token::GREATER_EQUAL, Token::LESS, Token::LESS_EQUAL)
       operator = previous
       right = addition
+
       expr = BinaryExpression.new(expr, operator, right)
     end
 
@@ -55,6 +87,7 @@ class Parser
     while matches?(Token::MINUS, Token::PLUS)
       operator = previous
       right = multiplication
+
       expr = BinaryExpression.new(expr, operator, right)
     end
 
@@ -67,6 +100,7 @@ class Parser
     while matches?(Token::SLASH, Token::STAR)
       operator = previous
       right = unary
+
       expr = BinaryExpression.new(expr, operator, right)
     end
 
@@ -77,6 +111,7 @@ class Parser
     if matches?(Token::BANG, Token::MINUS)
       operator = previous
       right = unary
+
       return UnaryExpression.new(operator, right)
     end
 
@@ -98,7 +133,7 @@ class Parser
       expr = expression
       consume(Token::RIGHT_PARENTHESIS, "Expect ')' after expression")
 
-      Grouping.new(expr)
+      return Grouping.new(expr)
     end
 
     raise error(peek, 'Expect expression')

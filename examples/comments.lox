@@ -1,13 +1,13 @@
 // This is a comment
 
-"hello"
+print "hello";
 
 /* So is this */
 
-"there"
+print "there";
 
 /**
- * And this is a comment too
+ * print And this is a comment too
  */
 
-"friend"
+print "friend";
