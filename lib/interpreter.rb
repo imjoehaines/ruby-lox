@@ -3,16 +3,16 @@
 
 require_relative 'token'
 require_relative 'environment'
-require_relative 'rlox-runtime-error'
-require_relative 'expressions/assignment-expression'
-require_relative 'expressions/binary-expression'
-require_relative 'expressions/call-expression'
-require_relative 'expressions/grouping-expression'
-require_relative 'expressions/literal-expression'
-require_relative 'expressions/unary-expression'
-require_relative 'statements/block-statement'
-require_relative 'statements/expression-statement'
-require_relative 'statements/print-statement'
+require_relative 'rlox_runtime_error'
+require_relative 'expressions/assignment_expression'
+require_relative 'expressions/binary_expression'
+require_relative 'expressions/call_expression'
+require_relative 'expressions/grouping_expression'
+require_relative 'expressions/literal_expression'
+require_relative 'expressions/unary_expression'
+require_relative 'statements/block_statement'
+require_relative 'statements/expression_statement'
+require_relative 'statements/print_statement'
 
 module Rlox
   class Interpreter
