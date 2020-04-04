@@ -2,6 +2,6 @@
 # frozen_string_literal: true
 
 module Rlox
-  class RloxParseError < RuntimeError
+  class ParseError < ::RuntimeError
   end
 end

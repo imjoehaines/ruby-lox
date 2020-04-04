@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 module Rlox
-  class RloxRuntimeError < RuntimeError
+  class RuntimeError < ::RuntimeError
     attr_reader :token
 
     def initialize(token, message)

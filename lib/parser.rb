@@ -3,7 +3,7 @@
 
 require_relative 'token'
 require_relative 'interpreter'
-require_relative 'rlox_parse_error'
+require_relative 'parse_error'
 require_relative 'expressions/assignment_expression'
 require_relative 'expressions/binary_expression'
 require_relative 'expressions/call_expression'
@@ -232,7 +232,7 @@ module Rlox
     def error(token, message)
       Rlox.parse_error(token, message)
 
-      RuntimeError.new(message)
+      ::RuntimeError.new(message)
     end
 
     def is_at_end?

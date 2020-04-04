@@ -3,7 +3,7 @@
 
 require_relative 'token'
 require_relative 'environment'
-require_relative 'rlox_runtime_error'
+require_relative 'runtime_error'
 require_relative 'expressions/assignment_expression'
 require_relative 'expressions/binary_expression'
 require_relative 'expressions/call_expression'
