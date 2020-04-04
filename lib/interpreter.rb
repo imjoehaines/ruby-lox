@@ -1,4 +1,4 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require_relative 'token'
@@ -6,7 +6,6 @@ require_relative 'environment'
 require_relative 'runtime_error'
 require_relative 'expressions/assignment_expression'
 require_relative 'expressions/binary_expression'
-require_relative 'expressions/call_expression'
 require_relative 'expressions/grouping_expression'
 require_relative 'expressions/literal_expression'
 require_relative 'expressions/unary_expression'
@@ -16,20 +15,25 @@ require_relative 'statements/print_statement'
 
 module Rlox
   class Interpreter
+    extend T::Sig
+
+    sig {void}
     def initialize
-      @environment = Environment.new
+      @environment = T.let(Environment.new, Environment)
     end
 
+    sig {params(statements: T::Array[Statement]).void}
     def interpret(statements)
       statements.each do |statement|
         execute(statement)
       end
-    rescue RloxRuntimeError => e
+    rescue RuntimeError => e
       Rlox.runtime_error(e)
     end
 
     private
 
+    sig {params(expression: Expression).returns(T.untyped)}
     def interpret_literal_expression(expression)
       unless expression.is_a? LiteralExpression
         raise "Expected Literal, not #{expression.class.name}"
@@ -38,6 +42,7 @@ module Rlox
       expression.value
     end
 
+    sig {params(expression: Expression).returns(T.untyped)}
     def interpret_grouping_expression(expression)
       unless expression.is_a? GroupingExpression
         raise "Expected GroupingExpression, not #{expression.class.name}"
@@ -46,6 +51,7 @@ module Rlox
       evaluate(expression)
     end
 
+    sig {params(expression: Expression).returns(T.untyped)}
     def interpret_unary_expression(expression)
       unless expression.is_a? UnaryExpression
         raise "Expected UnaryExpression, not #{expression.class.name}"
@@ -65,6 +71,7 @@ module Rlox
       raise "Unexpected #{expression.operator.type} in unary expression"
     end
 
+    sig {params(expression: Expression).returns(T.untyped)}
     def interpret_binary_expression(expression)
       unless expression.is_a? BinaryExpression
         raise "Expected BinaryExpression, not #{expression.class.name}"
@@ -82,7 +89,7 @@ module Rlox
           return left + right
         end
 
-        raise RloxRuntimeError.new(expression.operator, 'Operands must be two numbers or two strings')
+        raise RuntimeError.new(expression.operator, 'Operands must be two numbers or two strings')
       when Token::EQUAL_EQUAL
         return is_equal?(left, right)
       when Token::BANG_EQUAL
@@ -112,66 +119,64 @@ module Rlox
       raise "Unexpected #{expression.operator.type} in binary expression"
     end
 
+    sig {params(value: T.untyped).returns(T::Boolean)}
     def is_truthy?(value)
       !!value
     end
 
+    sig {params(left: T.untyped, right: T.untyped).returns(T::Boolean)}
     def is_equal?(left, right)
       left == right
     end
 
+    sig {params(expression: Expression).returns(T.untyped)}
     def evaluate(expression)
-      case true
-      when expression.is_a?(AssignmentExpression)
+      case expression
+      when AssignmentExpression
         value = evaluate(expression.value)
 
         @environment.assign(expression.name, value)
 
         value
-      when expression.is_a?(BinaryExpression)
+      when BinaryExpression
         interpret_binary_expression(expression)
-      when expression.is_a?(CallExpression)
-
-      when expression.is_a?(GroupingExpression)
+      when GroupingExpression
         interpret_grouping_expression(expression)
-      when expression.is_a?(LiteralExpression)
+      when LiteralExpression
         interpret_literal_expression(expression)
-      when expression.is_a?(UnaryExpression)
+      when UnaryExpression
         interpret_unary_expression(expression)
-      when expression.is_a?(VariableExpression)
+      when VariableExpression
         @environment.get(expression.name)
       else
         raise 'Invalid expression type'
       end
     end
 
+    sig {params(statement: Statement).void}
     def execute(statement)
-      case true
-      when statement.is_a?(ExpressionStatement)
+      case statement
+      when ExpressionStatement
         evaluate(statement.expression)
-
-        nil
-      when statement.is_a?(PrintStatement)
+      when PrintStatement
         value = evaluate(statement.value)
 
         puts value.to_s
-
-        nil
-      when statement.is_a?(VariableStatement)
+      when VariableStatement
         value = nil
+        initializer = statement.initializer
 
-        value = evaluate(statement.initializer) unless statement.initializer.nil?
+        value = evaluate(initializer) unless initializer.nil?
 
         @environment.define(statement.name.lexeme, value)
-
-        nil
-      when statement.is_a?(BlockStatement)
+      when BlockStatement
         execute_block(statement.statements, Environment.new(@environment))
       else
         raise 'Invalid statement type'
       end
     end
 
+    sig {params(statements: T::Array[Statement], environment: Environment).void}
     def execute_block(statements, environment)
       previous = @environment
 
@@ -186,10 +191,11 @@ module Rlox
       end
     end
 
+    sig {params(token: Token, value: T.untyped).void}
     def assert_is_numeric(token, value)
       return if value.is_a? Numeric
 
-      raise RloxRuntimeError.new(token, 'Operand must be numeric')
+      raise RuntimeError.new(token, 'Operand must be numeric')
     end
   end
 end

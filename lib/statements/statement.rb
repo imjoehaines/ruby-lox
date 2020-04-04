@@ -3,5 +3,9 @@
 
 module Rlox
   class Statement
+    extend T::Helpers
+    extend T::Sig
+
+    abstract!
   end
 end

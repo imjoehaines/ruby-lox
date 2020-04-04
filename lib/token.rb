@@ -1,10 +1,23 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 module Rlox
   class Token
-    attr_reader :type, :lexeme, :literal, :line
+    extend T::Sig
 
+    sig {returns(String)}
+    attr_reader :type
+
+    sig {returns(String)}
+    attr_reader :lexeme
+
+    sig {returns(T::nilable(String))}
+    attr_reader :literal
+
+    sig {returns(Integer)}
+    attr_reader :line
+
+    sig {params(type: String, lexeme: String, literal: T::nilable(String), line: Integer).void}
     def initialize(type, lexeme, literal, line)
       @type = type
       @lexeme = lexeme
@@ -12,6 +25,7 @@ module Rlox
       @line = line
     end
 
+    sig {returns(String)}
     def to_s
       "#{@type} #{@lexeme} #{@literal}"
     end
@@ -64,7 +78,7 @@ module Rlox
 
     EOF = 'T_EOF'
 
-    KEYWORDS = {
+    KEYWORDS = T.let({
       'and' => AND,
       'class' => CLASS,
       'else' => ELSE,
@@ -81,6 +95,6 @@ module Rlox
       'true' => TRUE,
       'var' => VAR,
       'while' => WHILE
-    }.freeze
+    }.freeze, T::Hash[String, String])
   end
 end

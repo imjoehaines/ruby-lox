@@ -1,12 +1,12 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require_relative 'token'
 require_relative 'interpreter'
 require_relative 'parse_error'
+require_relative 'runtime_error'
 require_relative 'expressions/assignment_expression'
 require_relative 'expressions/binary_expression'
-require_relative 'expressions/call_expression'
 require_relative 'expressions/grouping_expression'
 require_relative 'expressions/literal_expression'
 require_relative 'expressions/unary_expression'
@@ -18,39 +18,51 @@ require_relative 'statements/variable_statement'
 
 module Rlox
   class Parser
+    extend T::Sig
+
+    sig {params(tokens: T::Array[Token]).void}
     def initialize(tokens)
-      @tokens = tokens
-      @current = 0
+      @tokens = T.let(tokens, T::Array[Token])
+      @current = T.let(0, Integer)
     end
 
+    sig {returns(T::Array[Statement])}
     def parse
       statements = []
 
-      statements.push(declaration) until is_at_end?
+      until is_at_end?
+        statement = declaration
+
+        statements.push(declaration) unless statement.nil?
+      end
 
       statements
     rescue RuntimeError => e
-      nil
+      []
     end
 
     private
 
+    sig {returns(T.nilable(Statement))}
     def declaration
       return variable_declaration if matches?(Token::VAR)
       return BlockStatement.new(block) if matches?(Token::LEFT_BRACE)
 
       statement
-    rescue RloxParseError => e
+    rescue ParseError => e
       synchronise
 
       nil
     end
 
+    sig {returns(T::Array[Statement])}
     def block
       statements = []
 
       while !check?(Token::RIGHT_BRACE) && !is_at_end?
-        statements.push(declaration)
+        statement = declaration
+
+        statements.push(statement) unless statement.nil?
       end
 
       consume(Token::RIGHT_BRACE, "Expect '}' after block.")
@@ -58,6 +70,7 @@ module Rlox
       statements
     end
 
+    sig {returns(VariableStatement)}
     def variable_declaration
       name = consume(Token::IDENTIFIER, 'Expect variable name')
 
@@ -70,12 +83,14 @@ module Rlox
       VariableStatement.new(name, initializer)
     end
 
+    sig {returns(Statement)}
     def statement
       return print_statement if matches?(Token::PRINT)
 
       expression_statement
     end
 
+    sig {returns(PrintStatement)}
     def print_statement
       value = expression
 
@@ -84,6 +99,7 @@ module Rlox
       PrintStatement.new(value)
     end
 
+    sig {returns(ExpressionStatement)}
     def expression_statement
       value = expression
 
@@ -92,10 +108,12 @@ module Rlox
       ExpressionStatement.new(value)
     end
 
+    sig {returns(Expression)}
     def expression
       assignment
     end
 
+    sig {returns(Expression)}
     def assignment
       expr = equality
 
@@ -103,7 +121,7 @@ module Rlox
         equals = previous
         value = assignment
 
-        if expr.is_a?(VariableExpression)
+        if expr.is_a? VariableExpression
           return AssignmentExpression.new(expr.name, value)
         end
 
@@ -113,6 +131,7 @@ module Rlox
       expr
     end
 
+    sig {returns(Expression)}
     def equality
       expr = comparison
 
@@ -126,6 +145,7 @@ module Rlox
       expr
     end
 
+    sig {returns(Expression)}
     def comparison
       expr = addition
 
@@ -139,6 +159,7 @@ module Rlox
       expr
     end
 
+    sig {returns(Expression)}
     def addition
       expr = multiplication
 
@@ -152,6 +173,7 @@ module Rlox
       expr
     end
 
+    sig {returns(Expression)}
     def multiplication
       expr = unary
 
@@ -165,6 +187,7 @@ module Rlox
       expr
     end
 
+    sig {returns(Expression)}
     def unary
       if matches?(Token::BANG, Token::MINUS)
         operator = previous
@@ -176,6 +199,7 @@ module Rlox
       primary
     end
 
+    sig {returns(Expression)}
     def primary
       return LiteralExpression.new(false) if matches?(Token::FALSE)
 
@@ -199,6 +223,7 @@ module Rlox
       raise error(peek, 'Expect expression')
     end
 
+    sig {params(types: String).returns(T::Boolean)}
     def matches?(*types)
       types.each do |type|
         next unless check?(type)
@@ -211,42 +236,50 @@ module Rlox
       false
     end
 
+    sig {params(type: String).returns(T::Boolean)}
     def check?(type)
       return false if is_at_end?
 
       peek.type == type
     end
 
+    sig {returns(Token)}
     def advance
       @current += 1 unless is_at_end?
 
       previous
     end
 
+    sig {params(type: String, message: String).returns(Token)}
     def consume(type, message)
       return advance if check?(type)
 
       raise error(peek, message)
     end
 
+    sig {params(token: Token, message: String).returns(::RuntimeError)}
     def error(token, message)
       Rlox.parse_error(token, message)
 
       ::RuntimeError.new(message)
     end
 
+    sig {returns(T::Boolean)}
     def is_at_end?
       peek.type == Token::EOF
     end
 
+    sig {returns(Token)}
     def peek
-      @tokens[@current]
+      @tokens.fetch(@current)
     end
 
+    sig {returns(Token)}
     def previous
-      @tokens[@current - 1]
+      @tokens.fetch(@current - 1)
     end
 
+    sig {void}
     def synchronise
       advance
 

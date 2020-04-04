@@ -1,18 +1,22 @@
-# typed: true
+# typed: strict
 # frozen_string_literal: true
 
 require_relative 'token'
 
 module Rlox
   class Scanner
+    extend T::Sig
+
+    sig {params(source: String).void}
     def initialize(source)
-      @source = source
-      @tokens = []
-      @start = 0
-      @current = 0
-      @line = 1
+      @source = T.let(source, String)
+      @tokens = T.let([], T::Array[T.untyped])
+      @start = T.let(0, Integer)
+      @current = T.let(0, Integer)
+      @line = T.let(1, Integer)
     end
 
+    sig {returns(T::Array[Token])}
     def scan_tokens
       until is_at_end?
         @start = @current
@@ -27,6 +31,7 @@ module Rlox
 
     private
 
+    sig {void}
     def scan_token
       character = advance
 
@@ -81,6 +86,7 @@ module Rlox
       end
     end
 
+    sig {params(expected: String).returns(T::Boolean)}
     def matches?(expected)
       return false if is_at_end?
 
@@ -91,50 +97,74 @@ module Rlox
       true
     end
 
+    sig {returns(String)}
     def advance
       @current += 1
 
-      @source[@current - 1]
+      character = @source[@current - 1]
+
+      raise "Invalid index" if character.nil?
+
+      character
     end
 
+    sig {returns(String)}
     def peek
       return "\0" if is_at_end?
 
-      @source[@current]
+      character = @source[@current]
+
+      raise "Invalid index" if character.nil?
+
+      character
     end
 
+    sig {returns(String)}
     def peek_next
       return "\0" if @current + 1 >= @source.length
 
-      @source[@current + 1]
+      character = @source[@current + 1]
+
+      raise "Invalid index" if character.nil?
+
+      character
     end
 
+    sig {params(type: String).void}
     def add_token(type)
       add_token_with_value(type, nil)
     end
 
+    sig {params(type: String, literal: T::untyped).void}
     def add_token_with_value(type, literal)
       text = @source[@start..@current - 1]
+
+      raise "Invalid index" if text.nil?
 
       @tokens.push(Token.new(type, text, literal, @line))
     end
 
+    sig {returns(T::Boolean)}
     def is_at_end?
       @current >= @source.length
     end
 
+    sig {params(character: String).returns(T::Boolean)}
     def is_digit?(character)
       character >= '0' && character <= '9'
     end
 
+    sig {params(character: String).returns(T::Boolean)}
     def is_alpha?(character)
       (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || character == '_'
     end
 
+    sig {params(character: String).returns(T::Boolean)}
     def is_alpha_numeric?(character)
       is_digit?(character) || is_alpha?(character)
     end
 
+    sig {void}
     def string
       while peek != '"' && !is_at_end?
         @line += 1 if peek == "\n"
@@ -156,6 +186,7 @@ module Rlox
       add_token_with_value(Token::STRING, value)
     end
 
+    sig {void}
     def number
       advance while is_digit?(peek)
 
@@ -171,14 +202,19 @@ module Rlox
       add_token_with_value(Token::NUMBER, value)
     end
 
+    sig {void}
     def identifier
       advance while is_alpha_numeric?(peek)
 
       value = @source[@start..@current - 1]
 
-      type = Token::IDENTIFIER
+      raise "Invalid index" if value.nil?
 
-      type = Token::KEYWORDS[value] if Token::KEYWORDS.key?(value)
+      if Token::KEYWORDS.key?(value)
+        type = Token::KEYWORDS.fetch(value)
+      else
+        type = Token::IDENTIFIER
+      end
 
       add_token(type)
     end

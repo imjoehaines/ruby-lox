@@ -3,5 +3,9 @@
 
 module Rlox
   class Expression
+    extend T::Helpers
+    extend T::Sig
+
+    abstract!
   end
 end
