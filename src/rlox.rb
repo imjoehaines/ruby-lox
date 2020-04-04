@@ -18,7 +18,7 @@ class Rlox
     run(contents)
 
     exit 65 if @@had_error
-    exit 70 if @@had_error
+    exit 70 if @had_runtime_error
   end
 
   def run_prompt
