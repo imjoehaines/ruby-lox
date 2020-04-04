@@ -50,7 +50,7 @@ class Interpreter
       raise "Expected UnaryExpression, not #{expression.class.name}"
     end
 
-    right = evaluate(expression.right)
+    right = evaluate(expression.expression)
 
     case expression.operator.type
     when Token::MINUS
