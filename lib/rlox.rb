@@ -6,7 +6,6 @@ require_relative 'scanner'
 require_relative 'token'
 
 module Rlox
-  # TODO rename this
   class Rlox
     def initialize
       @@had_error = false
