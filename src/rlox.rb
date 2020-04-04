@@ -28,7 +28,7 @@ class Rlox
 
       input = STDIN.gets
 
-      run(input.chomp)
+      run(input.to_s.chomp)
 
       @@had_error = false
     end
