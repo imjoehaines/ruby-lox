@@ -1,5 +1,8 @@
 # typed: strong
 # frozen_string_literal: true
 
-class RloxParseError < RuntimeError
+module Rlox
+  # TODO rename this
+  class RloxParseError < RuntimeError
+  end
 end

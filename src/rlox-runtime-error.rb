@@ -1,12 +1,15 @@
 # typed: true
 # frozen_string_literal: true
 
-class RloxRuntimeError < RuntimeError
-  attr_reader :token
+module Rlox
+  # TODO rename this
+  class RloxRuntimeError < RuntimeError
+    attr_reader :token
 
-  def initialize(token, message)
-    super(message)
+    def initialize(token, message)
+      super(message)
 
-    @token = token
+      @token = token
+    end
   end
 end

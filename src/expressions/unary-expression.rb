@@ -1,15 +1,19 @@
 # typed: true
 # frozen_string_literal: true
 
-class UnaryExpression
-  attr_reader :operator, :expression
+require_relative 'expression'
 
-  def initialize(operator, expression)
-    @operator = operator
-    @expression = expression
-  end
+module Rlox
+  class UnaryExpression < Expression
+    attr_reader :operator, :expression
 
-  def to_s
-    "#{@operator} #{@expression}"
+    def initialize(operator, expression)
+      @operator = operator
+      @expression = expression
+    end
+
+    def to_s
+      "#{@operator} #{@expression}"
+    end
   end
 end

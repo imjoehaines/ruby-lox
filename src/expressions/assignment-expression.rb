@@ -1,15 +1,19 @@
 # typed: true
 # frozen_string_literal: true
 
-class AssignmentExpression
-  attr_reader :name, :value
+require_relative 'expression'
 
-  def initialize(name, value)
-    @name = name
-    @value = value
-  end
+module Rlox
+  class AssignmentExpression < Expression
+    attr_reader :name, :value
 
-  def to_s
-    "#{@name} #{@value}"
+    def initialize(name, value)
+      @name = name
+      @value = value
+    end
+
+    def to_s
+      "#{@name} #{@value}"
+    end
   end
 end

@@ -1,11 +1,15 @@
 # typed: true
 # frozen_string_literal: true
 
-class VariableStatement
-  attr_reader :name, :initializer
+require_relative 'statement'
 
-  def initialize(name, initializer)
-    @name = name
-    @initializer = initializer
+module Rlox
+  class VariableStatement < Statement
+    attr_reader :name, :initializer
+
+    def initialize(name, initializer)
+      @name = name
+      @initializer = initializer
+    end
   end
 end

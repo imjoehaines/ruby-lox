@@ -1,10 +1,14 @@
 # typed: true
 # frozen_string_literal: true
 
-class VariableExpression
-  attr_reader :name
+require_relative 'expression'
 
-  def initialize(name)
-    @name = name
+module Rlox
+  class VariableExpression < Expression
+    attr_reader :name
+
+    def initialize(name)
+      @name = name
+    end
   end
 end

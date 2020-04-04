@@ -1,10 +1,14 @@
 # typed: true
 # frozen_string_literal: true
 
-class BlockStatement
-  attr_reader :statements
+require_relative 'statement'
 
-  def initialize(statements)
-    @statements = statements
+module Rlox
+  class BlockStatement < Statement
+    attr_reader :statements
+
+    def initialize(statements)
+      @statements = statements
+    end
   end
 end
